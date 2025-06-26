@@ -19,25 +19,46 @@ class AuthController {
       const result = await authService.login(email, password);
       res.json(result);
     } catch (error) {
-      next(error);
+      res.status(401).json({ 
+        success: false,
+        message: error.message
+      });
     }
   }
 
   async verifyEmail(req, res, next) {
     try {
       const { token } = req.query;
+      
+      if (!token) {
+        return res.status(400).json({ 
+          success: false,
+          message: 'Verification token is required' 
+        });
+      }
+
       const result = await authService.verifyEmail(token);
       
       if (result.alreadyVerified) {
-        return res.json({ message: 'Email already verified' });
+        return res.json({ 
+          success: true,
+          message: 'Email was already verified',
+          user: result.user
+        });
       }
 
-      res.json({ 
-        message: 'Email verified successfully',
+      res.json({
+        success: true,
+        message: result.message,
         user: result.user
       });
+
     } catch (error) {
-      next(error);
+      res.status(400).json({
+        success: false,
+        message: error.message,
+        ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+      });
     }
   }
 

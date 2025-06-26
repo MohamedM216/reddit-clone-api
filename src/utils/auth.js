@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET, JWT_EXPIRY } = require('../config');
+const { JWT_SECRET, JWT_EXPIRY } = require('../../config');
 
 function generateToken(payload) {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRY });
@@ -10,7 +10,17 @@ function generateVerificationToken(userId) {
 }
 
 function verifyToken(token) {
-  return jwt.verify(token, JWT_SECRET);
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (!decoded.userId) {
+      throw new Error('Token missing required fields');
+    }
+    return decoded;
+  } catch (error) {
+    console.error('Token verification failed:', error.message);
+    throw new Error('Invalid or expired token');
+  }
 }
 
 async function hashPassword(password) {

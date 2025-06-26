@@ -12,7 +12,7 @@ const authMiddleware = {
       const token = authHeader.split(' ')[1];
       const decoded = verifyToken(token);
       
-      const user = await userRepository.findById(decoded.id);
+      const user = await userRepository.findById(decoded.userId);
       if (!user) {
         return res.status(401).json({ message: 'Invalid token - user not found' });
       }

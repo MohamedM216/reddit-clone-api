@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const { SMTP_CONFIG } = require('../config');
+const { SMTP_CONFIG } = require('../../config');
 const { generateVerificationToken } = require('../utils/auth');
 
 const transporter = nodemailer.createTransport(SMTP_CONFIG);

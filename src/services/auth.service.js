@@ -1,6 +1,7 @@
 const { 
   generateToken, 
   generateVerificationToken,
+  verifyToken,
   hashPassword, 
   comparePasswords 
 } = require('../utils/auth');
@@ -28,7 +29,7 @@ class AuthService {
       ...userData,
       password: hashedPassword,
       role: 'user',
-      emailVerified: false
+      email_verified: false
     });
 
     // Send verification email
@@ -39,19 +40,26 @@ class AuthService {
 
   async login(email, password) {
     const user = await userRepository.findByEmail(email);
+    console.log('User found:', user ? user.id : 'none');
+    
     if (!user) {
+      console.log('No user found with email:', email);
       throw new Error('Invalid credentials');
     }
 
     const isMatch = await comparePasswords(password, user.password);
+    
     if (!isMatch) {
+      console.log('Password comparison failed');
+      console.log('Input password:', password);
+      console.log('Stored hash:', user.password);
       throw new Error('Invalid credentials');
     }
 
     const token = generateToken({
-      id: user.id,
+      userId: user.id,
       role: user.role,
-      emailVerified: user.emailVerified
+      email_verified: user.emailVerified
     });
 
     return {
@@ -61,22 +69,39 @@ class AuthService {
   }
 
   async verifyEmail(token) {
+    if (!token) {
+        throw new Error('No token provided');
+    }
+
     try {
-      const { userId } = verifyToken(token);
-      const user = await userRepository.findById(userId);
-      
-      if (!user) {
+        const decoded = verifyToken(token);
+        console.log('Decoded token payload:', decoded);
+
+        const user = await userRepository.findById(decoded.userId);
+        if (!user) {
         throw new Error('User not found');
-      }
+        }
 
-      if (user.emailVerified) {
-        return { alreadyVerified: true };
-      }
+        if (user.emailVerified) {
+        return { alreadyVerified: true, user: user.toJSON() };
+        }
 
-      const updatedUser = await userRepository.update(user.id, { email_verified: true });
-      return { user: updatedUser.toJSON() };
+        const updatedUser = await userRepository.update(user.id, { 
+        email_verified: true 
+        });
+        
+        return { 
+        user: updatedUser.toJSON(),
+        message: 'Email verified successfully' 
+        };
+        
     } catch (error) {
-      throw new Error('Invalid or expired verification token');
+        console.error('Email verification error:', {
+        error: error.message,
+        token: token,
+        time: new Date().toISOString()
+        });
+        throw error;
     }
   }
 

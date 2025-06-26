@@ -4,6 +4,7 @@ class BaseRepository {
   constructor(tableName, modelClass) {
     this.tableName = tableName;
     this.modelClass = modelClass;
+    this.query = query;
   }
 
   async findById(id) {

@@ -29,6 +29,7 @@ class User {
       bio: this.bio,
       karma: this.karma,
       role: this.role,
+      emailVerified: this.emailVerified,
       createdAt: this.createdAt
     };
   }

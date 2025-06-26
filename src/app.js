@@ -2,6 +2,7 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
+const pool = require('./utils/db')
 
 const app = express();
 
@@ -15,6 +16,17 @@ app.use(morgan('dev'));
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK' });
 });
+
+// db connection check
+app.get('/dbconn', async (req, res) => {
+  try {
+    await pool.query('SELECT NOW()');
+    res.status(200).json({ status: 'Database connected successfully' });
+  } catch(error) {
+    'Database connection error:', error
+    res.status(500).json({ message: 'Database connection error: ' + error });
+  }
+})
 
 // Error handling middleware
 app.use((err, req, res, next) => {

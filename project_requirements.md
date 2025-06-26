@@ -6,7 +6,7 @@
 - User profiles (username, bio, karma points and other attriutes later).
 - Role-based permissions (User, Moderator, Admin).
 
-### B. Posts (Threads)
+### B. Posts
 
 - Create text/link/image posts.
 - Upvote/downvote posts (affects ranking).

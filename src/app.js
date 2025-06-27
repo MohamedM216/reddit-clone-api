@@ -6,6 +6,7 @@ const pool = require('./utils/db')
 
 // Route imports
 const authRoutes = require('./routes/auth.routes');
+const postRoutes = require('./routes/post.routes');
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(morgan('dev'));
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/posts', postRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

@@ -13,13 +13,16 @@ CREATE TABLE users (
 CREATE TABLE posts (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-  title VARCHAR(300) NOT NULL,
   content TEXT,
-  link VARCHAR(500),
   image_url VARCHAR(500),
-  type VARCHAR(10) CHECK (type IN ('text', 'link', 'image')),
   vote_count INTEGER DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE post_links (
+  id SERIAL PRIMARY KEY,
+  post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+  url VARCHAR(500) NOT NULL
 );
 
 CREATE TABLE comments (

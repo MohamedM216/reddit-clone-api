@@ -4,9 +4,9 @@ const postController = require('../controllers/post.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 
 // Public routes
+router.get('/search', postController.searchPosts);
 router.get('/:id', postController.getPost);
 router.get('/user/:userId', postController.getUserPosts);
-router.get('/search', postController.searchPosts);
 
 // Protected routes (require authentication)
 router.post('/', authMiddleware.authenticate, postController.createPost);

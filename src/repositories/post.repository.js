@@ -1,9 +1,21 @@
 const BaseRepository = require('./base.repository');
 const Post = require('../models/Post');
+const { storePostLinks } = require('../utils/linkExtractor');
 
 class PostRepository extends BaseRepository {
   constructor() {
     super('posts', Post);
+  }
+
+  async create(data) {
+    const result = await super.create(data);
+    
+    // Store links in separate table
+    if (data.content) {
+      await storePostLinks(result.id, data.content);
+    }
+    
+    return result;
   }
 
   async findByUserId(userId, { limit = 10, offset = 0 }) {
@@ -18,14 +30,38 @@ class PostRepository extends BaseRepository {
   }
 
   async searchPosts(query, { limit = 10, offset = 0 }) {
+    try {
+        if (!query || typeof query !== 'string') {
+          throw new Error('Invalid search query');
+        }
+
+        // Prepare the tsquery - handle multiple words
+        const searchQuery = query.trim().split(/\s+/).join(' & ') + ':*';
+
+        const result = await this.query(
+          `SELECT * FROM posts 
+          WHERE to_tsvector('english', content) @@ to_tsquery('english', $1)
+          ORDER BY created_at DESC 
+          LIMIT $2 OFFSET $3`,
+          [searchQuery, limit, offset]
+        );
+        
+        return result.rows.map(row => new this.modelClass(row));
+    } catch (error) {
+        console.error('Search error:', error);
+        throw new Error('Failed to search posts');
+    }
+  }
+
+  async getTotalSearchCount(query) {
+    const searchQuery = query.trim().split(/\s+/).join(' & ') + ':*';
+    
     const result = await this.query(
-      `SELECT * FROM posts 
-       WHERE to_tsvector('english', title || ' ' || content) @@ to_tsquery('english', $1)
-       ORDER BY created_at DESC 
-       LIMIT $2 OFFSET $3`,
-      [query + ':*', limit, offset]
+      `SELECT COUNT(*) FROM posts 
+      WHERE to_tsvector('english', content) @@ to_tsquery('english', $1)`,
+      [searchQuery]
     );
-    return result.rows.map(row => new this.modelClass(row));
+    return parseInt(result.rows[0].count, 10);
   }
 
   async getTotalCountByUserId(userId) {
@@ -36,13 +72,12 @@ class PostRepository extends BaseRepository {
     return parseInt(result.rows[0].count, 10);
   }
 
-  async getTotalSearchCount(query) {
+  async getPostLinks(postId) {
     const result = await this.query(
-      `SELECT COUNT(*) FROM posts 
-       WHERE to_tsvector('english', title || ' ' || content) @@ to_tsquery('english', $1)`,
-      [query + ':*']
+      'SELECT url FROM post_links WHERE post_id = $1',
+      [postId]
     );
-    return parseInt(result.rows[0].count, 10);
+    return result.rows.map(row => row.url);
   }
 }
 

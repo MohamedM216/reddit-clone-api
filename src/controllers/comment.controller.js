@@ -9,7 +9,8 @@ class CommentController {
         req.user.id,
         postId,
         content,
-        parentId
+        parentId, 
+        req.io
       );
       res.status(201).json(comment);
     } catch (error) {
@@ -26,7 +27,8 @@ class CommentController {
         commentId,
         req.user.id,
         { content },
-        emitEvent
+        emitEvent,
+        req.io
       );
       res.json(comment);
     } catch (error) {
@@ -70,7 +72,8 @@ class CommentController {
       const result = await commentService.deleteComment(
         commentId,
         req.user.id,
-        emitEvent
+        emitEvent,
+        req.io
       );
       res.json(result);
     } catch (error) {

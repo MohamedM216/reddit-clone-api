@@ -9,7 +9,12 @@ class CommentRepository extends BaseRepository {
   async updateComment(commentId, updateData) {
     const result = await this.query(
       `UPDATE comments 
-       SET content = $1, updated_at = CURRENT_TIMESTAMP
+       SET content = $1, 
+           updated_at = CASE 
+                         WHEN $1 <> (SELECT content FROM comments WHERE id = $2) 
+                         THEN CURRENT_TIMESTAMP 
+                         ELSE updated_at 
+                       END
        WHERE id = $2 
        RETURNING *`,
       [updateData.content, commentId]

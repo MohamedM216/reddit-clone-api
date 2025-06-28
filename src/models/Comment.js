@@ -6,7 +6,8 @@ class Comment {
     parent_id,
     content,
     vote_count,
-    created_at
+    created_at,
+    updated_at
   }) {
     this.id = id;
     this.userId = user_id;
@@ -15,6 +16,7 @@ class Comment {
     this.content = content;
     this.voteCount = vote_count || 0;
     this.createdAt = created_at;
+    this.updatedAt = updated_at;
   }
 
   toJSON() {
@@ -25,7 +27,8 @@ class Comment {
       parentId: this.parentId,
       content: this.content,
       voteCount: this.voteCount,
-      createdAt: this.createdAt
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt
     };
   }
 }

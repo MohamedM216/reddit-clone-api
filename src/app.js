@@ -8,6 +8,7 @@ const pool = require('./utils/db')
 const authRoutes = require('./routes/auth.routes');
 const postRoutes = require('./routes/post.routes');
 const commentRoutes = require('./routes/comment.routes');
+const voteRoutes = require('./routes/vote.routes');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api', commentRoutes);
+app.use('/api', voteRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

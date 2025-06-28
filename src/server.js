@@ -1,10 +1,15 @@
-const { setupSocket } = require('./utils/socket');
 const app = require('./app');
 const { PORT } = require('../config');
+const { setupSocket } = require('./utils/socket');
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
+// setup Socket.IO
 const io = setupSocket(server);
-app.set('io', io);
+app.set('io', io); 
+
+console.log('Socket.io initialized successfully');
+
+module.exports = { server, io };

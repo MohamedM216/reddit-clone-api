@@ -6,6 +6,17 @@ class CommentRepository extends BaseRepository {
     super('comments', Comment);
   }
 
+  async updateComment(commentId, updateData) {
+    const result = await this.query(
+      `UPDATE comments 
+       SET content = $1, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $2 
+       RETURNING *`,
+      [updateData.content, commentId]
+    );
+    return result.rows.length ? new this.modelClass(result.rows[0]) : null;
+  }
+
   async findByPostId(postId, { limit = 10, offset = 0 }) {
     const result = await this.query(
       `SELECT * FROM comments 

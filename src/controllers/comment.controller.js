@@ -17,6 +17,23 @@ class CommentController {
     }
   }
 
+  async updateComment(req, res, next) {
+    try {
+      const { commentId } = req.params;
+      const { content, emitEvent = true } = req.body;
+      
+      const comment = await commentService.updateComment(
+        commentId,
+        req.user.id,
+        { content },
+        emitEvent
+      );
+      res.json(comment);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getPostComments(req, res, next) {
     try {
       const { postId } = req.params;
@@ -48,7 +65,13 @@ class CommentController {
   async deleteComment(req, res, next) {
     try {
       const { commentId } = req.params;
-      const result = await commentService.deleteComment(commentId, req.user.id);
+      const { emitEvent = true } = req.body;
+      
+      const result = await commentService.deleteComment(
+        commentId,
+        req.user.id,
+        emitEvent
+      );
       res.json(result);
     } catch (error) {
       next(error);

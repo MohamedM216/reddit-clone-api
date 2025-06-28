@@ -10,6 +10,12 @@ router.post(
   commentController.createComment
 );
 
+router.put(
+  '/comments/:commentId',
+  authMiddleware.authenticate,
+  commentController.updateComment
+);
+
 router.delete(
   '/comments/:commentId',
   authMiddleware.authenticate,

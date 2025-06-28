@@ -41,6 +41,36 @@ class CommentService {
     return commentWithAuthor;
   }
 
+  async updateComment(commentId, userId, updateData, emitEvent = true) {
+    const comment = await commentRepository.findById(commentId);
+    if (!comment) {
+      throw new Error('Comment not found');
+    }
+
+    if (comment.userId !== userId) {
+      throw new Error('Unauthorized to update this comment');
+    }
+
+    const updatedComment = await commentRepository.updateComment(
+      commentId,
+      updateData
+    );
+
+    const commentWithAuthor = await commentRepository.getCommentWithAuthor(updatedComment.id);
+
+    // Conditionally emit real-time event
+    if (emitEvent) {
+      if (comment.parentId) {
+        io.to(`comment_${comment.parentId}`).emit('updatedReply', commentWithAuthor);
+      } else {
+        io.to(`post_${comment.postId}`).emit('updatedComment', commentWithAuthor);
+      }
+    }
+
+    return commentWithAuthor;
+  }
+
+
   async getCommentsByPostId(postId, pagination = {}) {
     const [comments, total] = await Promise.all([
       commentRepository.findByPostId(postId, pagination),
@@ -71,7 +101,7 @@ class CommentService {
     };
   }
 
-  async deleteComment(commentId, userId) {
+  async deleteComment(commentId, userId, emitEvent = true) {
     const comment = await commentRepository.findById(commentId);
     if (!comment) {
       throw new Error('Comment not found');
@@ -83,10 +113,13 @@ class CommentService {
 
     await commentRepository.delete(commentId);
 
-    if (comment.parentId) {
-      io.to(`comment_${comment.parentId}`).emit('deletedReply', commentId);
-    } else {
-      io.to(`post_${comment.postId}`).emit('deletedComment', commentId);
+    // Conditionally emit real-time event
+    if (emitEvent) {
+      if (comment.parentId) {
+        io.to(`comment_${comment.parentId}`).emit('deletedReply', commentId);
+      } else {
+        io.to(`post_${comment.postId}`).emit('deletedComment', commentId);
+      }
     }
 
     return { message: 'Comment deleted successfully' };

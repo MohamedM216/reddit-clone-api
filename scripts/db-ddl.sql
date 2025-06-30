@@ -36,18 +36,18 @@ CREATE TABLE comments (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE votes (
+CREATE TABLE post_votes (
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+  value SMALLINT NOT NULL CHECK (value IN (-1, 1)),
+  PRIMARY KEY (user_id, post_id)
+);
+
+CREATE TABLE comment_votes (
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   comment_id INTEGER REFERENCES comments(id) ON DELETE CASCADE,
   value SMALLINT NOT NULL CHECK (value IN (-1, 1)),
-  
-  CONSTRAINT chk_vote_target CHECK (
-    (post_id IS NULL AND comment_id IS NOT NULL) OR
-    (post_id IS NOT NULL AND comment_id IS NULL)
-  ),
-  
-  PRIMARY KEY (user_id, post_id, comment_id)
+  PRIMARY KEY (user_id, comment_id)
 );
 
 CREATE TABLE notifications (

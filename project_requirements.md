@@ -3,28 +3,34 @@
 ### A. User System
 
 - Signup/login (Email + Password + email confirmation, JWT for sessions).
-- User profiles (username, bio, karma points and other attriutes later).
-- Role-based permissions (User, Moderator, Admin).
+- User profiles (username, bio, karma points and other attriutes).
+- Role-based permissions (User for now).
 
 ### B. Posts
 
-- Create text/link/image posts.
+- CRUD for posts.
 - Upvote/downvote posts (affects ranking).
-- Sorting (Hot, New, Top, Controversial).
+- Sorting (New, Top, Controversial). -- TODO
 
 ### C. Comments & Replies
 
+- CRUD for comments and replies.
 - Nested replies (unlimited depth).
-- Voting on comments.
+- Upvote/downvote comments/replies.
 
-### D. Notifications
+### D. Notifications  -- TODO
 
-- Notify users when their post/comment gets a reply.
+- Notify users when:
+    - their post gets a comment.
+    - their comment gets a reply.
+    - other users mention them (@username).
+    - there are system updates.
+    - other users up/downvote on their content (comment, reply, post).
 
 ### E. Search
 
-- Full-text search for posts/comments.
+- Full-text search for posts.
 
 ### F. Analytics (Stretch)
 
-- Most active users, trending posts.
+- Most active users, trending posts. -- TODO

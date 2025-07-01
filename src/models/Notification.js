@@ -7,7 +7,8 @@ class Notification {
     comment_id,
     type,
     read,
-    created_at
+    created_at,
+    updated_at
   }) {
     this.id = id;
     this.userId = user_id;
@@ -17,6 +18,7 @@ class Notification {
     this.type = type;
     this.read = read || false;
     this.createdAt = created_at;
+    this.updatedAt = updated_at;
   }
 
   toJSON() {
@@ -28,7 +30,8 @@ class Notification {
       commentId: this.commentId,
       type: this.type,
       read: this.read,
-      createdAt: this.createdAt
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt
     };
   }
 }

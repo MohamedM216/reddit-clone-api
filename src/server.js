@@ -1,7 +1,7 @@
 const app = require('./app');
 const { PORT } = require('../config');
 const { setupSocket } = require('./utils/socket');
-const { setupNotificationHandlers } = require('./handlers/notification.handlers');
+const NotificationHandlers = require('./handlers/notification.handlers');
 
 const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
@@ -13,6 +13,6 @@ app.set('io', io);
 
 console.log('Socket.io initialized successfully');
 
-setupNotificationHandlers();
+new NotificationHandlers(io);
 
 module.exports = { server, io };

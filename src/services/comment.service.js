@@ -1,5 +1,6 @@
 const commentRepository = require('../repositories/comment.repository');
 const postRepository = require('../repositories/post.repository');
+const notificationService = require('../services/notification.service');
 
 class CommentService {
   async createComment(userId, postId, content, parentId = null, io) {
@@ -39,33 +40,52 @@ class CommentService {
         isReply: !!parentId
       });
 
-      // Send notification to post owner (for top-level comments)
-      if (!parentId && post.userId !== userId) {
-        io.to(`user_${post.userId}`).emit('notification:new', {
-          type: 'comment',
-          data: {
+      try {
+        // Send notification to post owner (for top-level comments)
+        if (!parentId && post.userId.toString() !== userId.toString()) {
+          console.log('Creating post owner notification:', {
+            userId: post.userId,
+            senderId: userId,
+            postId,
+            commentId: comment.id
+          });
+
+          const notification = await notificationService.createNotification({
+            userId: post.userId,
+            senderId: userId,
             postId,
             commentId: comment.id,
+            type: 'comment'
+          });
+            
+          io.to(`user_${post.userId}`).emit('notification:new', notification);
+          console.log('Post owner notification created:', notification);
+        }
+  
+        // Send notification to parent comment owner (for replies)
+        if (parentId && parentComment.userId.toString() !== userId.toString()) {
+          console.log('Creating reply notification:', {
+            userId: parentComment.userId,
             senderId: userId,
-            senderUsername: commentWithAuthor.author?.username,
-            contentPreview: content.substring(0, 100)
-          }
-        });
-      }
+            postId,
+            commentId: parentId,
+            replyId: comment.id
+          });
 
-      // Send notification to parent comment owner (for replies)
-      if (parentId && parentComment.userId !== userId) {
-        io.to(`user_${parentComment.userId}`).emit('notification:new', {
-          type: 'reply',
-          data: {
+          const notification = await notificationService.createNotification({
+            userId: parentComment.userId,
+            senderId: userId,
             postId,
             commentId: parentId,
             replyId: comment.id,
-            senderId: userId,
-            senderUsername: commentWithAuthor.author?.username,
-            contentPreview: content.substring(0, 100)
-          }
-        });
+            type: 'reply'
+          });
+            
+          io.to(`user_${parentComment.userId}`).emit('notification:new', notification);
+          console.log('Reply notification created:', notification);
+        }
+      } catch (error) {
+        console.error('Error creating comment notification:', error);
       }
     }
 

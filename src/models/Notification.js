@@ -8,8 +8,6 @@ class Notification {
     type,
     read,
     created_at,
-    sender_username,
-    comment_preview,
     updated_at
   }) {
     this.id = id;
@@ -20,8 +18,6 @@ class Notification {
     this.type = type;
     this.read = read;
     this.createdAt = created_at;
-    this.senderUsername = sender_username;
-    this.commentPreview = comment_preview;
     this.updatedAt = updated_at;
   }
 
@@ -31,15 +27,10 @@ class Notification {
       type: this.type,
       read: this.read,
       createdAt: this.createdAt,
-      sender: {
-        id: this.senderId,
-        username: this.senderUsername
-      },
-      id: this.postId,
-      comment: this.commentId ? {
-        id: this.commentId,
-        preview: this.commentPreview?.substring(0, 100)
-      } : null,
+      senderId: this.senderId,
+      userId: this.userId,
+      postId: this.postId,
+      commentId: this.commentId,
       updatedAt: this.updatedAt
     };
   }

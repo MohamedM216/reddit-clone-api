@@ -5,6 +5,7 @@
 - Signup/login (Email + Password + email confirmation, JWT for sessions).
 - User profiles (username, bio, karma points and other attriutes).
 - Role-based permissions (User for now).
+- User update their profiles -- TODO
 
 ### B. Posts
 
@@ -19,7 +20,7 @@
 - Upvote/downvote comments/replies.
 
 ### D. Notifications  -- TODO
-
+- Event-Driven Notifications System
 - Notify users when:
     - their post gets a comment.
     - their comment gets a reply.

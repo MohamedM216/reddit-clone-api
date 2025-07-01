@@ -1,7 +1,12 @@
 const { query } = require('../utils/db');
+const BaseRepository = require('./base.repository');
 const Notification = require('../models/Notification');
 
-class NotificationRepository {
+class NotificationRepository extends BaseRepository {
+  constructor() {
+    super('notifications', Notification);
+  }
+
   async create(notificationData) {
     const result = await query(
       `INSERT INTO notifications 
@@ -21,16 +26,10 @@ class NotificationRepository {
 
   async findByUserId(userId, { limit = 10, offset = 0 }) {
     const result = await query(
-      `SELECT n.*, 
-              u.username as sender_username,
-              p.title as post_title,
-              c.content as comment_preview
-       FROM notifications n
-       LEFT JOIN users u ON n.sender_id = u.id
-       LEFT JOIN posts p ON n.post_id = p.id
-       LEFT JOIN comments c ON n.comment_id = c.id
-       WHERE n.user_id = $1
-       ORDER BY n.created_at DESC
+      `SELECT *
+       FROM notifications
+       WHERE user_id = $1
+       ORDER BY created_at DESC
        LIMIT $2 OFFSET $3`,
       [userId, limit, offset]
     );

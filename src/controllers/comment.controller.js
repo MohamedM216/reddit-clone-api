@@ -9,7 +9,8 @@ class CommentController {
         req.user.id,
         postId,
         content,
-        parentId
+        parentId,
+        req.io
       );
       res.status(201).json(comment);
     } catch (error) {

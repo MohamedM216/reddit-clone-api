@@ -9,9 +9,11 @@ class CommentService {
       throw new Error('Post not found');
     }
 
+    let parentComment = null;
+
     // If this is a reply, verify parent comment exists
     if (parentId) {
-      const parentComment = await commentRepository.findById(parentId);
+      parentComment = await commentRepository.findById(parentId);
       if (!parentComment) {
         throw new Error('Parent comment not found');
       }
@@ -63,7 +65,7 @@ class CommentService {
         }
   
         // Send notification to parent comment owner (for replies)
-        if (parentId && parentComment.userId.toString() !== userId.toString()) {
+        if (parentId && parentComment && parentComment.userId.toString() !== userId.toString()) {
           console.log('Creating reply notification:', {
             userId: parentComment.userId,
             senderId: userId,

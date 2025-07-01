@@ -21,11 +21,13 @@ class VoteService {
     );
 
     if (io) {
-      if (postId) {
-      io.to(`post_${postId}`).emit('voteUpdate', { postId, value });
-      } else {
-      io.to(`comment_${commentId}`).emit('voteUpdate', { commentId, value });
-      }
+      const target = postId ? `post_${postId}` : `comment_${commentId}`;
+      io.to(target).emit('vote:update', {
+        postId,
+        commentId,
+        value,
+        voterId: userId
+      });
     }
     return result;
   }
@@ -42,11 +44,12 @@ class VoteService {
     const result = await voteRepository.deleteVote(userId, { postId, commentId });
 
     if (io) {
-      if (postId) {
-        io.to(`post_${postId}`).emit('voteUpdate', { postId, value: 0 });
-      } else {
-        io.to(`comment_${commentId}`).emit('voteUpdate', { commentId, value: 0 });
-      }
+      const target = postId ? `post_${postId}` : `comment_${commentId}`;
+      io.to(target).emit('vote:remove', {
+        postId,
+        commentId,
+        voterId: userId
+      });
     }
     
     return result;

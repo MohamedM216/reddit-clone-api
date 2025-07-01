@@ -30,12 +30,18 @@ class CommentService {
     const commentWithAuthor = await commentRepository.getCommentWithAuthor(comment.id);
 
     if (io) {
+      const eventName = parentId ? 'comment:reply' : 'comment:new';
+      io.to(`post_${postId}`).emit(eventName, {
+        postId,
+        comment: commentWithAuthor,
+        isReply: !!parentId
+      });
+      
       if (parentId) {
-        // reply to a comment
-        io.to(`comment_${parentId}`).emit('newReply', commentWithAuthor);
-      } else {
-        // top-level comment
-        io.to(`post_${postId}`).emit('newComment', commentWithAuthor);
+        io.to(`comment_${parentId}`).emit('comment:reply', {
+          parentId,
+          reply: commentWithAuthor
+        });
       }
     }
 
@@ -61,11 +67,10 @@ class CommentService {
 
     // Conditionally emit real-time event
     if (io && emitEvent) {
-      if (comment.parentId) {
-        io.to(`comment_${comment.parentId}`).emit('updatedReply', commentWithAuthor);
-      } else {
-        io.to(`post_${comment.postId}`).emit('updatedComment', commentWithAuthor);
-      }
+      io.to(`post_${comment.postId}`).emit('comment:updated', {
+        postId: comment.postId,
+        comment: commentWithAuthor
+      });
     }
 
     return commentWithAuthor;
@@ -116,11 +121,10 @@ class CommentService {
 
     // Conditionally emit real-time event
     if (io && emitEvent) {
-      if (comment.parentId) {
-        io.to(`comment_${comment.parentId}`).emit('deletedReply', commentId);
-      } else {
-        io.to(`post_${comment.postId}`).emit('deletedComment', commentId);
-      }
+      io.to(`post_${comment.postId}`).emit('comment:deleted', {
+        postId: comment.postId,
+        commentId
+      });
     }
 
     return { message: 'Comment deleted successfully' };

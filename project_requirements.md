@@ -19,13 +19,13 @@
 - Nested replies (unlimited depth).
 - Upvote/downvote comments/replies.
 
-### D. Notifications  -- TODO
+### D. Notifications
 - Event-Driven Notifications System
 - Notify users when:
     - their post gets a comment.
     - their comment gets a reply.
-    - other users mention them (@username).
-    - there are system updates.
+    - other users mention them (@username). -- TODO
+    - there are system updates.  -- TODO
     - other users up/downvote on their content (comment, reply, post).
 
 ### E. Search

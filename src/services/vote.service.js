@@ -1,4 +1,7 @@
 const voteRepository = require('../repositories/vote.repository');
+const postRepository = require('../repositories/post.repository');
+const commentRepository = require('../repositories/comment.repository');
+const notificationService = require('../services/notification.service');
 
 class VoteService {
   async vote(userId, { postId, commentId }, value, io) {
@@ -30,27 +33,32 @@ class VoteService {
         voterId: userId
       });
 
-      let contentOwnerId;
-      if (postId) {
-        const post = await postRepository.findById(postId);
-        contentOwnerId = post?.userId;
-      } else {
-        const comment = await commentRepository.findById(commentId);
-        contentOwnerId = comment?.userId;
-      }
+      try {
+        let contentOwnerId;
+        if (postId) {
+          const post = await postRepository.findById(postId);
+          contentOwnerId = post?.userId;
+        } else {
+          const comment = await commentRepository.findById(commentId);
+          contentOwnerId = comment?.userId;
+        }
 
-      if (contentOwnerId && contentOwnerId !== userId) {
-        io.to(`user_${contentOwnerId}`).emit('notification:new', {
-          type: value === 1 ? 'upvote' : 'downvote',
-          data: {
+        if (contentOwnerId && contentOwnerId.toString() !== userId.toString()) {
+          const notification = await notificationService.createNotification({
+            userId: contentOwnerId,
+            senderId: userId,
             postId,
             commentId,
-            voterId: userId,
-            value
-          }
-        });
+            type: value === 1 ? 'upvote' : 'downvote'
+          });
+          
+          io.to(`user_${contentOwnerId}`).emit('notification:new', notification);
+        }
+      } catch (error) {
+        console.error('Error creating vote notification:', error);
       }
     }
+
     return result;
   }
 

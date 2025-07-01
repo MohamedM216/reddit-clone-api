@@ -21,18 +21,40 @@ class VoteService {
     );
 
     if (io) {
-      const target = postId ? `post_${postId}` : `comment_${commentId}`;
-      io.to(target).emit('vote:update', {
+      const targetRoom = postId ? `post_${postId}` : `comment_${commentId}`;
+      
+      io.to(targetRoom).emit('vote:update', {
         postId,
         commentId,
         value,
         voterId: userId
       });
+
+      let contentOwnerId;
+      if (postId) {
+        const post = await postRepository.findById(postId);
+        contentOwnerId = post?.userId;
+      } else {
+        const comment = await commentRepository.findById(commentId);
+        contentOwnerId = comment?.userId;
+      }
+
+      if (contentOwnerId && contentOwnerId !== userId) {
+        io.to(`user_${contentOwnerId}`).emit('notification:new', {
+          type: value === 1 ? 'upvote' : 'downvote',
+          data: {
+            postId,
+            commentId,
+            voterId: userId,
+            value
+          }
+        });
+      }
     }
     return result;
   }
 
-  async removeVote(userId, { postId, commentId }, io) {
+  async removeVote(userId, { postId, commentId }) {
     if (!postId && !commentId) {
       throw new Error('Either postId or commentId must be provided');
     }
@@ -42,15 +64,6 @@ class VoteService {
     }
 
     const result = await voteRepository.deleteVote(userId, { postId, commentId });
-
-    if (io) {
-      const target = postId ? `post_${postId}` : `comment_${commentId}`;
-      io.to(target).emit('vote:remove', {
-        postId,
-        commentId,
-        voterId: userId
-      });
-    }
     
     return result;
   }

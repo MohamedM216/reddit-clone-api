@@ -31,16 +31,40 @@ class CommentService {
 
     if (io) {
       const eventName = parentId ? 'comment:reply' : 'comment:new';
-      io.to(`post_${postId}`).emit(eventName, {
+      const targetRoom = parentId ? `comment_${parentId}` : `post_${postId}`;
+
+      io.to(targetRoom).emit(eventName, {
         postId,
         comment: commentWithAuthor,
         isReply: !!parentId
       });
-      
-      if (parentId) {
-        io.to(`comment_${parentId}`).emit('comment:reply', {
-          parentId,
-          reply: commentWithAuthor
+
+      // Send notification to post owner (for top-level comments)
+      if (!parentId && post.userId !== userId) {
+        io.to(`user_${post.userId}`).emit('notification:new', {
+          type: 'comment',
+          data: {
+            postId,
+            commentId: comment.id,
+            senderId: userId,
+            senderUsername: commentWithAuthor.author?.username,
+            contentPreview: content.substring(0, 100)
+          }
+        });
+      }
+
+      // Send notification to parent comment owner (for replies)
+      if (parentId && parentComment.userId !== userId) {
+        io.to(`user_${parentComment.userId}`).emit('notification:new', {
+          type: 'reply',
+          data: {
+            postId,
+            commentId: parentId,
+            replyId: comment.id,
+            senderId: userId,
+            senderUsername: commentWithAuthor.author?.username,
+            contentPreview: content.substring(0, 100)
+          }
         });
       }
     }
@@ -48,7 +72,7 @@ class CommentService {
     return commentWithAuthor;
   }
 
-  async updateComment(commentId, userId, updateData, emitEvent = true, io) {
+  async updateComment(commentId, userId, updateData) {
     const comment = await commentRepository.findById(commentId);
     if (!comment) {
       throw new Error('Comment not found');
@@ -64,14 +88,6 @@ class CommentService {
     );
 
     const commentWithAuthor = await commentRepository.getCommentWithAuthor(updatedComment.id);
-
-    // Conditionally emit real-time event
-    if (io && emitEvent) {
-      io.to(`post_${comment.postId}`).emit('comment:updated', {
-        postId: comment.postId,
-        comment: commentWithAuthor
-      });
-    }
 
     return commentWithAuthor;
   }
@@ -107,7 +123,7 @@ class CommentService {
     };
   }
 
-  async deleteComment(commentId, userId, emitEvent = true, io) {
+  async deleteComment(commentId, userId) {
     const comment = await commentRepository.findById(commentId);
     if (!comment) {
       throw new Error('Comment not found');
@@ -118,14 +134,6 @@ class CommentService {
     }
 
     await commentRepository.delete(commentId);
-
-    // Conditionally emit real-time event
-    if (io && emitEvent) {
-      io.to(`post_${comment.postId}`).emit('comment:deleted', {
-        postId: comment.postId,
-        commentId
-      });
-    }
 
     return { message: 'Comment deleted successfully' };
   }

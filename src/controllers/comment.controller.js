@@ -9,8 +9,7 @@ class CommentController {
         req.user.id,
         postId,
         content,
-        parentId, 
-        req.io
+        parentId
       );
       res.status(201).json(comment);
     } catch (error) {
@@ -21,14 +20,11 @@ class CommentController {
   async updateComment(req, res, next) {
     try {
       const { commentId } = req.params;
-      const { content, emitEvent = true } = req.body;
       
       const comment = await commentService.updateComment(
         commentId,
         req.user.id,
-        { content },
-        emitEvent,
-        req.io
+        { content }
       );
       res.json(comment);
     } catch (error) {
@@ -67,13 +63,10 @@ class CommentController {
   async deleteComment(req, res, next) {
     try {
       const { commentId } = req.params;
-      const { emitEvent = true } = req.body;
       
       const result = await commentService.deleteComment(
         commentId,
-        req.user.id,
-        emitEvent,
-        req.io
+        req.user.id
       );
       res.json(result);
     } catch (error) {

@@ -36,8 +36,7 @@ class VoteController {
       const { postId, commentId } = req.params;
       const result = await voteService.removeVote(
         req.user.id,
-        { postId, commentId },
-        req.io
+        { postId, commentId }
       );
       res.json(result);
     } catch (error) {

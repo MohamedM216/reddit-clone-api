@@ -20,6 +20,7 @@ Check out the full API documentation here:
 - **Environment Config:** dotenv
 - **Logging:** Morgan
 - **Development Tools:** Nodemon
+- **File Upload:** Multer
 
 ## 📁 Project Structure
 
@@ -43,6 +44,7 @@ reddit-clone-api/
 ├── .gitignore
 ├── count_lines.sh
 ├── project_requirements.md
+├── LICENSE
 └── README.md
 ```
 
@@ -59,7 +61,7 @@ reddit-clone-api/
 - Create/update/delete posts
 - Pagination support
 - Search by content
-- Image support
+- Image support: upload up to 10 images per post
 
 ### 💬 Comments
 - Add/update/delete comments & replies
@@ -123,7 +125,7 @@ npm start
 - Sorting posts (New, Top, Controversial)
 - Users update their profiles
 - Notify users when other users mention them (@username)
-- Notify when are system updates
+- Notify when there are system updates
 - Most active users, trending posts.
 
 

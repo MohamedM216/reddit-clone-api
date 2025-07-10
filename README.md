@@ -24,7 +24,15 @@ Check out the full API documentation here:
 
 ## Database Schema (ERD):
 
-**[DB_ERD]**(https://github.com/MohamedM216/reddit-clone-api/blob/master/DB_ERD.pgerd)
+- [Database ERD](https://github.com/MohamedM216/reddit-clone-api/blob/master/diagrams/DB_ERD.pgerd)
+
+## Sequence Diagrams:
+
+- [Creating a new post with authentication flow](https://github.com/MohamedM216/reddit-clone-api/blob/master/diagrams/newpost.png)
+
+- [Authentication flow](https://github.com/MohamedM216/reddit-clone-api/blob/master/diagrams/auth.png)
+
+- [Notification Flow (for new comments)](https://github.com/MohamedM216/reddit-clone-api/blob/master/diagrams/notification-newcomment.png)
 
 ## 📁 Project Structure
 

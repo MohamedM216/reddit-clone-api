@@ -1,3 +1,4 @@
+const { query } = require('../utils/db');
 const BaseRepository = require('./base.repository');
 const Post = require('../models/Post');
 const { storePostLinks } = require('../utils/linkExtractor');
@@ -10,12 +11,18 @@ class PostRepository extends BaseRepository {
   async create(data) {
     const result = await super.create(data);
     
-    // Store links in separate table
     if (data.content) {
       await storePostLinks(result.id, data.content);
     }
     
     return result;
+  }
+
+  async findById(id) {
+    const result = await query('SELECT * FROM posts WHERE id = $1', [id]);
+    if (!result.rows.length) return null;
+    
+    return new Post(result.rows[0]);
   }
 
   async findByUserId(userId, { limit = 10, offset = 0 }) {

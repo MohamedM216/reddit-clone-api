@@ -1,64 +1,76 @@
+const path = require('path');
 const Post = require('../models/Post');
 const postRepository = require('../repositories/post.repository');
-const { validateUrl, validateImage } = require('../utils/validation');
+const postImageRepository = require('../repositories/postImage.repository');
 const { extractLinks } = require('../utils/linkExtractor');
+const { saveFile, validateFile, deleteFile } = require('../utils/fileUpload');
+const { UPLOAD } = require('../../config');
 
 class PostService {
-  async createPost(userId, postData) {
-    this._validatePostData(postData);
-
-    if (postData.imageUrl) {
-      await validateImage(postData.imageUrl);
+  async createPost(userId, postData, files = []) {
+    if (files.length > UPLOAD.MAX_IMAGES_PER_POST) {
+      throw new Error(`Maximum ${UPLOAD.MAX_IMAGES_PER_POST} images allowed per post`);
     }
-
-    const post = await postRepository.create({
-        user_id: userId,
-        content: postData.content,
-        image_url: postData.imageUrl
-    });
+      
+    files.forEach(file => validateFile(file));
     
-    const links = extractLinks(postData.content);
-    return { ...post.toJSON(), links };
+    const { pool } = require('../utils/db');
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      const post = await postRepository.create({
+        user_id: userId,
+        content: postData.content
+      });
+
+      if (files.length > 0) {
+        await this._savePostImages(post.id, files);
+      }
+
+      await client.query('COMMIT');
+
+      const links = extractLinks(postData.content);
+  
+      return this._getPostWithImages(post.id, links);
+    } catch (error) {
+      await client.query('ROLLBACK');
+      
+      if (files.length > 0) {
+        await Promise.all(files.map(file => 
+            deleteFile(path.join(UPLOAD.DIR, file.filename || file.originalname))
+        ));
+      }
+      console.error('Update post error:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
-  async updatePost(postId, userId, updateData) {
+  async updatePost(postId, userId, updateData, files = []) {
     const post = await postRepository.findById(postId);
-    if (!post) {
-      throw new Error('Post not found');
+    if (!post) throw new Error('Post not found');
+    if (post.userId !== userId) throw new Error('Unauthorized');
+
+    if (files.length > UPLOAD.MAX_IMAGES_PER_POST) {
+      throw new Error(`Maximum ${UPLOAD.MAX_IMAGES_PER_POST} images allowed per post`);
     }
-
-    if (post.userId !== userId) {
-      throw new Error('Unauthorized to update this post');
-    }
-
-    this._validatePostData(updateData);
-
-    if (updateData.imageUrl) {
-      await validateImage(updateData.imageUrl);
-    }
-
-    // Begin transaction for atomic updates
-    const { query, pool } = require('../utils/db'); 
+    
+    files.forEach(file => validateFile(file));
+    
+    const { pool } = require('../utils/db');
     const client = await pool.connect(); 
 
     try {
       await client.query('BEGIN');
 
-      // 1. Verify post exists and belongs to user
-      const postCheck = await client.query(
-          'SELECT user_id FROM posts WHERE id = $1 FOR UPDATE',
-          [postId]
-      );
-      
-      if (postCheck.rows.length === 0) {
-          throw new Error('Post not found');
+      if (files.length > 0) {
+        const oldImages = await postImageRepository.deleteByPostId(postId);
+        await Promise.all(oldImages.map(img => deleteFile(img.filePath)));
       }
 
-      if (postCheck.rows[0].user_id !== userId) {
-          throw new Error('Unauthorized to update this post');
-      }
-
-      // 2. Delete existing links if content is being updated
       if (updateData.content !== undefined) {
         await client.query(
             'DELETE FROM post_links WHERE post_id = $1',
@@ -66,21 +78,12 @@ class PostService {
         );
       }
 
-      // 3. Update the post
-      const updateQuery = `
-        UPDATE posts 
-        SET content = COALESCE($1, content),
-            image_url = COALESCE($2, image_url)
-        WHERE id = $3
-        RETURNING *
-      `;
-      const result = await client.query(updateQuery, [
-        updateData.content,
-        updateData.imageUrl,
-        postId
-      ]);
+      if (files.length > 0) {
+        await this._savePostImages(postId, files);
+      }
 
-      // 4. Store new links if content was updated
+      const updatedPost = await postRepository.update(postId, updateData);
+
       if (updateData.content !== undefined) {
         const links = extractLinks(updateData.content);
         for (const link of links) {
@@ -89,28 +92,62 @@ class PostService {
             [postId, link.url]
           );
         }
+
       }
 
       await client.query('COMMIT');
 
-      // Return the updated post with links
-      const updatedPost = new Post(result.rows[0]);
       const linksResult = await client.query(
         'SELECT url FROM post_links WHERE post_id = $1',
         [postId]
       );
+      const links = linksResult.rows.map(row => row.url);
+      return this._getPostWithImages(updatedPost.id, links);
 
-      return { 
-        ...updatedPost.toJSON(),
-        links: linksResult.rows.map(row => row.url)
-      };
     } catch (error) {
       await client.query('ROLLBACK');
+
+      if (files.length > 0) {
+        await Promise.all(files.map(file => 
+            deleteFile(path.join(UPLOAD.DIR, file.filename || file.originalname))
+        ));
+      }
+
       console.error('Update post error:', error);
       throw error;
     } finally {
       client.release();
     }
+  }
+
+  async _savePostImages(postId, files) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const savedFile = await saveFile(file);
+      await postImageRepository.create(postId, {
+        ...savedFile,
+        orderIndex: i
+      });
+    }
+  }
+
+  async _getPostWithImages(postId, links) {
+    const post = await postRepository.findById(postId);
+    if (!post) throw new Error('Post not found');
+    console.log(`post: ${post.toJSON()}`);
+
+    const images = await postImageRepository.findByPostId(postId);
+    console.log(`images: ${images.map(i => i.toJSON())}`);
+
+    return { 
+      ...post.toJSON(),
+      links,
+      images: images.map(img => ({
+        id: img.id,
+        url: `/uploads/${img.fileName}`,
+        orderIndex: img.orderIndex
+      }))
+    };
   }
 
   async deletePost(postId, userId) {
@@ -132,16 +169,21 @@ class PostService {
     if (!post) {
       throw new Error('Post not found');
     }
-    return post;
-  }
-  async getPostById(postId) {
-    const post = await postRepository.findById(postId);
-    if (!post) {
-      throw new Error('Post not found');
-    }
 
-    const links = await postRepository.getPostLinks(postId);
-    return { ...post.toJSON(), links };
+    const [links, images] = await Promise.all([
+      postRepository.getPostLinks(postId),
+      postImageRepository.findByPostId(postId)
+    ]);
+
+    return { 
+      ...post.toJSON(), 
+      links,
+      images: images.map(img => ({
+        id: img.id,
+        url: `/uploads/${img.fileName}`,
+        orderIndex: img.orderIndex
+      }))
+    };
   }
 
   async getPostsByUserId(userId, pagination = {}) {
@@ -150,8 +192,22 @@ class PostService {
       postRepository.getTotalCountByUserId(userId)
     ]);
 
+    const postsWithImages = await Promise.all(
+      posts.map(async post => {
+        const images = await postImageRepository.findByPostId(post.id);
+        return {
+          ...post.toJSON(),
+          images: images.map(img => ({
+            id: img.id,
+            url: `/uploads/${img.fileName}`,
+            orderIndex: img.orderIndex
+          }))
+        };
+      })
+    );
+
     return {
-      data: posts,
+      data: postsWithImages,
       pagination: {
         ...pagination,
         total
@@ -165,29 +221,27 @@ class PostService {
       postRepository.getTotalSearchCount(query)
     ]);
 
+    const postsWithImages = await Promise.all(
+      posts.map(async post => {
+        const images = await postImageRepository.findByPostId(post.id);
+        return {
+          ...post.toJSON(),
+          images: images.map(img => ({
+            id: img.id,
+            url: `/uploads/${img.fileName}`,
+            orderIndex: img.orderIndex
+          }))
+        };
+      })
+    );
+
     return {
-      data: posts,
+      data: postsWithImages,
       pagination: {
         ...pagination,
         total
       }
     };
-  }
-
-  _validatePostData(postData) {
-    const { content, imageUrl } = postData;
-
-    if (!content && !imageUrl) {
-      throw new Error('Post must have content or image');
-    }
-
-    if (content && content.length > 10000) {
-      throw new Error('Content must be 10,000 characters or less');
-    }
-
-    if (imageUrl && imageUrl.length > 500) {
-      throw new Error('Image URL must be 500 characters or less');
-    }
   }
 }
 

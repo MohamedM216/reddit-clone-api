@@ -1,9 +1,14 @@
 const postService = require('../services/post.service');
+const upload = require('../middlewares/upload.middleware');
 
 class PostController {
   async createPost(req, res, next) {
     try {
-      const post = await postService.createPost(req.user.id, req.body);
+      const post = await postService.createPost(
+        req.user.id, 
+        req.body,
+        req.files
+      );
       res.status(201).json(post);
     } catch (error) {
       next(error);
@@ -15,7 +20,8 @@ class PostController {
       const post = await postService.updatePost(
         req.params.id,
         req.user.id,
-        req.body
+        req.body,
+        req.files
       );
       res.json(post);
     } catch (error) {

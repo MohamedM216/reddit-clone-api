@@ -22,6 +22,10 @@ Check out the full API documentation here:
 - **Development Tools:** Nodemon
 - **File Upload:** Multer
 
+## Database Schema (ERD):
+
+**[DB_ERD]**(https://github.com/MohamedM216/reddit-clone-api/blob/master/DB_ERD.pgerd)
+
 ## 📁 Project Structure
 
 ```

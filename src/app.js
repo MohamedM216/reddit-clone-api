@@ -3,6 +3,9 @@ const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
 const pool = require('./utils/db')
+const path = require('path');
+const { UPLOAD } = require('../config');
+
 
 // Route imports
 const authRoutes = require('./routes/auth.routes');
@@ -23,6 +26,9 @@ app.use((req, res, next) => {
   req.io = app.get('io'); 
   next();
 });
+
+// server static files
+app.use('/uploads', express.static(path.join(__dirname, UPLOAD.DIR)));
 
 // Routes
 app.use('/api/auth', authRoutes);

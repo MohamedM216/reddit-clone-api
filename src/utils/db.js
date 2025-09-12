@@ -15,5 +15,5 @@ pool.on('error', (err) => {
 
 module.exports = {
   query: (text, params) => pool.query(text, params),
-  pool, // export pool for transactions if needed
+  pool, // export pool for transactions
 };

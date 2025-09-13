@@ -48,8 +48,8 @@ app.get('/dbconn', async (req, res) => {
     await pool.query('SELECT NOW()');
     res.status(200).json({ status: 'Database connected successfully' });
   } catch(error) {
-    res.status(500).json({ message: 'Database connection error' });
     console.log('Database connection error: ' + error);
+    res.status(500).json({ message: 'Database connection error' });
   }
 })
 

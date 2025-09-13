@@ -1,6 +1,7 @@
 const { verifyToken } = require('../utils/auth');
 const userRepository = require('../repositories/user.repository');
 
+// layered security model
 const authMiddleware = {
   authenticate: async (req, res, next) => {
     try {
@@ -14,7 +15,7 @@ const authMiddleware = {
       
       const user = await userRepository.findById(decoded.userId);
       if (!user) {
-        return res.status(401).json({ message: 'Invalid token - user not found' });
+        return res.status(401).json({ message: 'Invalid token' });
       }
 
       req.user = user;

@@ -2,17 +2,14 @@ const multer = require('multer');
 const path = require('path');
 const crypto = require('crypto');
 const { UPLOAD } = require('../../config');
-const { validateFile } = require('../utils/fileUpload');
+const { generateFileName, validateFile } = require('../utils/fileUpload');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, UPLOAD.DIR);
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const randomString = crypto.randomBytes(8).toString('hex');
-    const timestamp = Date.now();
-    cb(null, `${timestamp}-${randomString}${ext}`);
+    cb(null, generateFileName(file.originalname));
   }
 });
 

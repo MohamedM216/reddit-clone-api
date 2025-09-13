@@ -25,7 +25,7 @@ function verifyToken(token) {
 
 async function hashPassword(password) {
   const bcrypt = require('bcryptjs');
-  const salt = await bcrypt.genSalt(10);
+  const salt = await bcrypt.genSalt();
   return await bcrypt.hash(password, salt);
 }
 

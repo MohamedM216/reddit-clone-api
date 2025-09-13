@@ -17,6 +17,6 @@ module.exports = {
     DIR: process.env.UPLOAD_DIR || './uploads',
     MAX_IMAGES_PER_POST: parseInt(process.env.MAX_IMAGES_PER_POST || '10', 10),
     MAX_FILE_SIZE: parseInt(process.env.MAX_FILE_SIZE || '5242880', 10),
-    ALLOWED_MIME_TYPES: (process.env.ALLOWED_MIME_TYPES || 'image/jpeg,image/png,image/gif,image/webp').split(',')
+    ALLOWED_MIME_TYPES: (process.env.ALLOWED_MIME_TYPES || 'image/jpg,image/jpeg,image/png,image/gif,image/webp').split(',')
   }
 };

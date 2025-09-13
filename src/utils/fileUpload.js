@@ -35,7 +35,7 @@ async function saveFile(file) {
 
 async function deleteFile(filePath) {
   try {
-    await fs.promises.access(filePath, fs.constants.F_OK); // Check file exists first
+    await fs.promises.access(filePath, fs.constants.F_OK);
     await unlinkAsync(filePath);
   } catch (err) {
     if (err.code !== 'ENOENT') { // Only log if it's not a "file not found" error

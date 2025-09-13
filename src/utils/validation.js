@@ -1,13 +1,7 @@
 const { URL } = require('url');
 const axios = require('axios');
 const contentDisposition = require('content-disposition');
-
-const ALLOWED_IMAGE_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp'
-];
+const { UPLOAD } = require('../../config');
 
 const BLOCKED_DOMAINS = [
   'malicious-site-for-example.com',
@@ -18,9 +12,9 @@ const BLOCKED_DOMAINS = [
 
 async function validateUrl(url) {
   try {
-    new URL(url); // Throws if invalid URL
+    const temp = new URL(url);
 
-    const domain = new URL(url).hostname;
+    const domain = temp.hostname;
     if (BLOCKED_DOMAINS.includes(domain)) {
       throw new Error('Links from this domain are not allowed');
     }
@@ -38,15 +32,14 @@ async function validateImage(imageUrl) {
 
     const response = await axios.head(imageUrl, { timeout: 5000 });
     const contentType = response.headers['content-type'];
-    const contentLength = parseInt(response.headers['content-length'], 10);
+    const contentLength = parseInt(contentType, 10);
 
-    if (!ALLOWED_IMAGE_TYPES.includes(contentType)) {
+    if (!UPLOAD.ALLOWED_MIME_TYPES.includes(contentType)) {
       throw new Error(`Image type ${contentType} is not allowed`);
     }
 
-    // max size is 5MB
-    if (contentLength > 5 * 1024 * 1024) {
-      throw new Error('Image size must be less than 5MB');
+    if (contentLength > UPLOAD.MAX_FILE_SIZE) {
+      throw new Error(`Image size must be less than ${UPLOAD.MAX_FILE_SIZE}MB`);
     }
 
     if (response.headers['content-disposition']) {

@@ -6,18 +6,6 @@ const { getIO } = require('../utils/socket');
 
 class VoteService {
   async vote(userId, { postId, commentId }, value) {
-    if (value !== 1 && value !== -1) {
-      throw new Error('Invalid vote value');
-    }
-
-    if (!postId && !commentId) {
-      throw new Error('Either postId or commentId must be provided');
-    }
-
-    if (postId && commentId) {
-      throw new Error('Cannot vote on both post and comment simultaneously');
-    }
-
     const result = await voteRepository.createOrUpdateVote(
       userId,
       { postId, commentId },
@@ -66,14 +54,6 @@ class VoteService {
   }
 
   async removeVote(userId, { postId, commentId }) {
-    if (!postId && !commentId) {
-      throw new Error('Either postId or commentId must be provided');
-    }
-
-    if (postId && commentId) {
-      throw new Error('Cannot remove vote from both post and comment simultaneously');
-    }
-
     const result = await voteRepository.deleteVote(userId, { postId, commentId });
     
     return result;

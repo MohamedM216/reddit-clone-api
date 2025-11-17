@@ -1,10 +1,11 @@
 const socketio = require('socket.io');
 
+let io;
+
 function setupSocket(server) {
-  const io = socketio(server, {
+  io = socketio(server, {
     cors: {
-      origin: process.env.CLIENT_URL || '*',
-      methods: ['GET', 'POST']
+      origin: /* process.env.CLIENT_URL || */ '*',  // setting up client is in progress...
     }
   });
 
@@ -34,4 +35,8 @@ function setupSocket(server) {
   return io;
 }
 
-module.exports = { setupSocket };
+function getIO() {
+  return io;
+}
+
+module.exports = { setupSocket, getIO };

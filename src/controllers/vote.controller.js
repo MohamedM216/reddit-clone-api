@@ -7,8 +7,7 @@ class VoteController {
       const result = await voteService.vote(
         req.user.id,
         { postId, commentId },
-        1,
-        req.io
+        1
       );
       res.json(result);
     } catch (error) {
@@ -22,8 +21,7 @@ class VoteController {
       const result = await voteService.vote(
         req.user.id,
         { postId, commentId },
-        -1, 
-        req.io
+        -1
       );
       res.json(result);
     } catch (error) {

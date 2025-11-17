@@ -1,9 +1,10 @@
 const commentRepository = require('../repositories/comment.repository');
 const postRepository = require('../repositories/post.repository');
 const notificationService = require('../services/notification.service');
+const { getIO } = require('../utils/socket');
 
 class CommentService {
-  async createComment(userId, postId, content, parentId = null, io) {
+  async createComment(userId, postId, content, parentId = null) {
     const post = await postRepository.findById(postId);
     if (!post) {
       throw new Error('Post not found');
@@ -31,7 +32,8 @@ class CommentService {
 
     // Get comment with author details for real-time broadcast
     const commentWithAuthor = await commentRepository.getCommentWithAuthor(comment.id);
-
+    const io = getIO();
+    
     if (io) {
       const eventName = parentId ? 'comment:reply' : 'comment:new';
       const targetRoom = parentId ? `comment_${parentId}` : `post_${postId}`;

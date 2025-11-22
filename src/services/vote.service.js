@@ -3,6 +3,7 @@ const postRepository = require('../repositories/post.repository');
 const commentRepository = require('../repositories/comment.repository');
 const notificationService = require('../services/notification.service');
 const { getIO } = require('../utils/socket');
+const { success } = require('zod');
 
 class VoteService {
   async vote(userId, { postId, commentId }, value) {
@@ -11,6 +12,10 @@ class VoteService {
       { postId, commentId },
       value
     );
+
+    if (!result.success) {
+      throw new Error('No such post id or comment id');
+    }
 
     const io = getIO();
 
@@ -47,6 +52,7 @@ class VoteService {
         }
       } catch (error) {
         console.error('Error creating vote notification:', error);
+        throw error;
       }
     }
 
@@ -55,12 +61,12 @@ class VoteService {
 
   async removeVote(userId, { postId, commentId }) {
     const result = await voteRepository.deleteVote(userId, { postId, commentId });
-    
     return result;
   }
 
   async getVote(userId, { postId, commentId }) {
-    return voteRepository.getVote(userId, { postId, commentId });
+    let vote = await voteRepository.getVote(userId, { postId, commentId });
+    return vote;
   }
 }
 

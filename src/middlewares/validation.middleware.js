@@ -1,5 +1,4 @@
-const { ValidationError } = require('../utils/errors');
-const { z } = require('zod');
+const { z, ZodError } = require('zod');
 
 module.exports = 
   (schema) =>
@@ -14,7 +13,11 @@ module.exports =
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return next(new ValidationError(error.errors));
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          error: error.message
+        });
       }
       next(error);
     }

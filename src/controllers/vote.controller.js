@@ -9,7 +9,11 @@ class VoteController {
         { postId, commentId },
         1
       );
-      res.json(result);
+      res.status(200).json({
+        success: true,
+        data: result,
+        message: postId ? 'Post upvoted successfully' : 'Comment upvoted successfully'
+      });
     } catch (error) {
       next(error);
     }
@@ -23,7 +27,11 @@ class VoteController {
         { postId, commentId },
         -1
       );
-      res.json(result);
+      res.status(200).json({
+        success: true,
+        data: result,
+        message: postId ? 'Post downvoted successfully' : 'Comment downvoted successfully'
+      });
     } catch (error) {
       next(error);
     }
@@ -36,7 +44,11 @@ class VoteController {
         req.user.id,
         { postId, commentId }
       );
-      res.json(result);
+      res.status(200).json({
+        success: true,
+        data: result,
+        message: postId ? 'Vote removed from post successfully' : 'Vote removed from comment successfully'
+      });
     } catch (error) {
       next(error);
     }
@@ -49,7 +61,11 @@ class VoteController {
         req.user.id,
         { postId, commentId }
       );
-      res.json({ vote });
+      res.status(200).json({
+        success: true,
+        data: { vote },
+        message: vote ? 'Vote retrieved successfully' : 'No vote found',
+      });
     } catch (error) {
       next(error);
     }

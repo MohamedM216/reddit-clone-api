@@ -122,6 +122,11 @@ Production
 npm start
 ```
 
+Run tests
+```
+npm test
+```
+
 ## 🔐 Security Features
 
 - Rate Limiting (express-rate-limit)

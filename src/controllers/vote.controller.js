@@ -10,12 +10,12 @@ class VoteController {
         1
       );
       if (result.success) {
-        res.status(200).json({
+        return res.status(200).json({
           success: true,
           message: postId ? 'Post upvoted successfully' : 'Comment upvoted successfully'
         });
       }
-      res.status(500).json({
+      return res.status(500).json({
         success:false,
         message: 'upvoting error'
       });
@@ -33,12 +33,12 @@ class VoteController {
         -1
       );
       if (result.success) {
-        res.status(200).json({
+        return res.status(200).json({
           success: true,
           message: postId ? 'Post downvoted successfully' : 'Comment downvoted successfully'
         });
       }
-      res.status(500).json({
+      return res.status(500).json({
         success:false,
         message: 'upvoting error'
       });
@@ -55,12 +55,12 @@ class VoteController {
         { postId, commentId }
       );
       if (result.success) {
-        res.status(200).json({
+        return res.status(200).json({
           success: true,
           message: postId ? 'Vote removed from post successfully' : 'Vote removed from comment successfully'
         });
       }
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'error removing voting'
       });

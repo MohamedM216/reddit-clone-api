@@ -45,10 +45,7 @@ const authMiddleware = {
 
   checkVerified: (req, res, next) => {
     if (!req.user.emailVerified) {
-      return res.status(403).json({ 
-        message: 'Email not verified',
-        code: 'EMAIL_NOT_VERIFIED'
-      });
+      return res.status(403).json({ message: 'Email not verified' });
     }
     next();
   }

@@ -1,7 +1,7 @@
-const voteController = require('../../src/controllers/vote.controller');
-const voteService = require('../../src/services/vote.service');
+const voteController = require('../../../src/controllers/vote.controller');
+const voteService = require('../../../src/services/vote.service');
 
-jest.mock('../../src/services/vote.service', () => ({
+jest.mock('../../../src/services/vote.service', () => ({
     vote: jest.fn(),
     removeVote: jest.fn(),
     getVote: jest.fn()

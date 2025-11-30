@@ -1,15 +1,15 @@
-const voteService = require('../../src/services/vote.service');
-const voteRepository = require('../../src/repositories/vote.repository');
-const postRepository = require('../../src/repositories/post.repository');
-const commentRepository = require('../../src/repositories/comment.repository');
-const notificationService = require('../../src/services/notification.service');
-const { getIO } = require('../../src/utils/socket');
+const voteService = require('../../../src/services/vote.service');
+const voteRepository = require('../../../src/repositories/vote.repository');
+const postRepository = require('../../../src/repositories/post.repository');
+const commentRepository = require('../../../src/repositories/comment.repository');
+const notificationService = require('../../../src/services/notification.service');
+const { getIO } = require('../../../src/utils/socket');
 
-jest.mock('../../src/repositories/vote.repository');
-jest.mock('../../src/repositories/post.repository');
-jest.mock('../../src/repositories/comment.repository');
-jest.mock('../../src/services/notification.service');
-jest.mock('../../src/utils/socket');
+jest.mock('../../../src/repositories/vote.repository');
+jest.mock('../../../src/repositories/post.repository');
+jest.mock('../../../src/repositories/comment.repository');
+jest.mock('../../../src/services/notification.service');
+jest.mock('../../../src/utils/socket');
 
 const mockEmit = jest.fn();
 const mockIO = {

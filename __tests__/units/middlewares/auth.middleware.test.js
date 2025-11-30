@@ -1,12 +1,12 @@
-const authMiddleware = require('../../src/middlewares/auth.middleware');
-const authUtil = require('../../src/utils/auth');
-const userRepository = require('../../src/repositories/user.repository');
+const authMiddleware = require('../../../src/middlewares/auth.middleware');
+const authUtil = require('../../../src/utils/auth');
+const userRepository = require('../../../src/repositories/user.repository');
 
-jest.mock('../../src/utils/auth', () => ({
+jest.mock('../../../src/utils/auth', () => ({
   verifyToken: jest.fn()
 }));
 
-jest.mock('../../src/repositories/user.repository', () => ({
+jest.mock('../../../src/repositories/user.repository', () => ({
   findById: jest.fn()
 }));
 

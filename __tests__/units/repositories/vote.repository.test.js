@@ -1,17 +1,17 @@
-const voteRepository = require('../../src/repositories/vote.repository');
-const userRepository = require('../../src/repositories/user.repository');
-const postRepository = require('../../src/repositories/post.repository');
-const commentRepository = require('../../src/repositories/comment.repository');
-const db = require('../../src/utils/db');
+const voteRepository = require('../../../src/repositories/vote.repository');
+const userRepository = require('../../../src/repositories/user.repository');
+const postRepository = require('../../../src/repositories/post.repository');
+const commentRepository = require('../../../src/repositories/comment.repository');
+const db = require('../../../src/utils/db');
 const { query } = db;
 
-jest.mock('../../src/utils/db', () => ({
+jest.mock('../../../src/utils/db', () => ({
   query: jest.fn(),
 }));
 
-jest.mock('../../src/repositories/user.repository');
-jest.mock('../../src/repositories/post.repository');
-jest.mock('../../src/repositories/comment.repository');
+jest.mock('../../../src/repositories/user.repository');
+jest.mock('../../../src/repositories/post.repository');
+jest.mock('../../../src/repositories/comment.repository');
 
 describe('voteRepository', () => {
   const mockUserId = 1;

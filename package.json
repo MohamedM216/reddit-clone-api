@@ -20,6 +20,7 @@
   "author": "mohammad elshennawy",
   "license": "MIT",
   "dependencies": {
+    "@redis/client": "^5.10.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
@@ -32,6 +33,8 @@
     "nodemailer": "^7.0.6",
     "nodemon": "^3.1.10",
     "pg": "^8.16.3",
+    "rate-limit-redis": "^4.3.1",
+    "redis": "^5.10.0",
     "socket.io": "^4.8.1",
     "zod": "^4.1.12"
   },

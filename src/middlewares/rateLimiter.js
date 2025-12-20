@@ -1,5 +1,4 @@
 const rateLimit = require('express-rate-limit');
-const { skip } = require('node:test');
 const { RedisStore } = require('rate-limit-redis')
 const { createClient } = require('redis');
 

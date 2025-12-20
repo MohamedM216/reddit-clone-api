@@ -1,6 +1,5 @@
 const multer = require('multer');
 const path = require('path');
-const crypto = require('crypto');
 const { UPLOAD } = require('../../config');
 const { generateFileName, validateFile } = require('../utils/fileUpload');
 
@@ -50,7 +49,7 @@ module.exports = (req, res, next) => {
       return res.status(500).json({ error: 'File upload failed' });
     }
     
-    req.files = req.files || [];
+    req.files = req.files || []; // ensures req.files always exists
     next();
   });
 };

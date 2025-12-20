@@ -22,11 +22,6 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
-app.use((req, res, next) => {
-  req.io = app.get('io'); 
-  next();
-});
-
 // server static files
 app.use('/uploads', express.static(path.join(__dirname, UPLOAD.DIR)));
 

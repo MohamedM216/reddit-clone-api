@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_DB: reddit
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 2162004
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - reddit-net
+
+  redis:
+    image: redis:7
+    container_name: redis
+    networks:
+      - reddit-net
+
+  api:
+    build: .
+    container_name: reddit-api
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - reddit-net
+
+networks:
+  reddit-net:
+
+volumes:
+  postgres-data:
